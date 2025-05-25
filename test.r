@@ -1,0 +1,6 @@
+data <- read.csv("data", header = TRUE, sep = " ")
+# glimpse(data)
+print(data)
+print(summary(data))
+# summary(data).print()
+print(lm(data=data))
