@@ -14,7 +14,7 @@ clear
 // Memory settings
 *set memory 20M
 // Clear output
-display _newline(200)
+/* display _newline(200) */
 //////////////////////////////////////////////////////////////////////////////////
 
 
