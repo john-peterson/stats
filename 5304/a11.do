@@ -29,9 +29,9 @@ iis state
 tis year
 
 // Logarithmic data
-gen lVio = ln(vio)
-gen lRob = ln(rob)
-gen lMur = ln(mur)
+gen lvio = ln(vio)
+gen lrob = ln(rob)
+gen lmur = ln(mur)
 
 // Year dummies
 tab year, gen(dy)
@@ -52,10 +52,8 @@ line vio year if state == 1
 //////////////////////////////////////////////////////////////////////////////////
 // 1a: Pooled-OLS estimate
 // ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-/* 
-regress lVio shall, robust
-regress lVio shall incarc_rate density avginc pop pb1064 pw1064 pm1029, robust
-*/
+regress lvio shall, robust
+regress lvio shall incarc_rate density avginc pop pb1064 pw1064 pm1029, robust
 //////////////////////////////////////////////////////////////////////////////////
 
 
