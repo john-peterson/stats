@@ -1,0 +1,81 @@
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// File Description
+// ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+/*
+Question 1bc:
+	1. Estimate, fit and check an AR and ARMA model
+*/
+//////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// Settings
+// ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+// Set working directory
+cd "J:\Files\Backed up work\Kurser\Old courses\4124 - Advanced Empirical Methods in Finance\Assignment 2\Stata"
+// Read data
+include "Question 1.do"
+//////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// Prepare data
+// ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+// Make a continuous list of days
+gen tlist = _n
+tsset tlist
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// Show single model
+// ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+arima retx if ticker == "GM", arima(1,0,1)
+estat ic
+arima retx if ticker == "ewretx", arima(1,0,1)
+estat ic
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// ARMA
+// ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+// Create data tables
+gen Label = ""
+gen BIC0 = .
+gen BIC1 = .
+gen BIC2 = .
+gen BIC3 = .
+
+// Produce models
+levelsof ticker
+local i = 0
+foreach l in `=r(levels)' {
+	local i = `i' + 1
+	quietly replace Label = "`l'" in `i'
+
+	forvalues j = 0(1)3 {
+		display as error "`l'"
+		*quietly arima retx if ticker == "`l'", arima(`j',0,0)
+		quietly estat ic
+		quietly arima retx if ticker == "`l'", arima(1,0,`j')
+		quietly estat ic
+		matrix b = r(S)
+		quietly replace BIC`j' = b[1,6] in `i'
+	}
+}
+
+format BIC0 BIC1 BIC2 BIC3 %9.0f
+format Label %-10s
+list Label BIC0-BIC3 if _n < 8
+//////////////////////////////////////////////////////////////////////////////////
+
+
