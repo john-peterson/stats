@@ -1,9 +1,28 @@
 library("plm" )
-library(RStata)
 data("Cigar", package = "plm")
 z <- Cigar[ Cigar$year %in% c( 63, 73) , ]
 
-options("RStata.StataPath" = "/home/a/stata")
+# R random
+r = coef(plm(sales ~ pop, 
+            data=z, 
+            model="random", 
+            index=c("state", "year")))
+print(r)
+#>   (Intercept)           pop 
+#>  1.311398e+02 -6.837769e-04
+
+# R fixed 
+z2 <- pdata.frame( z , index=c("state", "year")  )    
+r = coef( plm( sales ~ pop , data= z2  , model="within" ) )
+print(r)
+#>          pop 
+#> -0.003210817
+
+library(readstata13)
+save.dta13(dat, file="cigar.dta")
+
+library(RStata)
+options("RStata.StataPath" = "/home/a/stata/stata")
 options("RStata.StataVersion" = 14)
 
 # Stata fe 
@@ -36,17 +55,7 @@ stata(stata_do1, data.out = TRUE, data.in = z)
 #>          pop |  -.0032108   .0043826    -0.73   0.468    -.0120378    .0056162
 #>        _cons |   141.5186   18.06909     7.83   0.000     105.1256    177.9116
 #> -------------+----------------------------------------------------------------
-#>      sigma_u |  34.093409
-#>      sigma_e |  15.183908
-#>          rho |  .83448264   (fraction of variance due to u_i)
-#> ------------------------------------------------------------------------------
-#> F test that all u_i=0: F(45, 45) = 8.91                      Prob > F = 0.0000
 
-# R 
-z2 <- pdata.frame( z , index=c("state", "year")  )    
-coef( plm( sales ~ pop , data= z2  , model="within" ) )
-#>          pop 
-#> -0.003210817
 
 # Stata re
 stata_do2 <- '
@@ -54,13 +63,6 @@ stata_do2 <- '
   xtreg sales pop, re
 '
 stata(stata_do2, data.out = TRUE, data.in = z)
-#> . 
-#> .   xtset state year
-#>        panel variable:  state (strongly balanced)
-#>         time variable:  year, 63 to 73, but with gaps
-#>                 delta:  1 unit
-#> .   xtreg sales pop, re
-#> 
 #> Random-effects GLS regression                   Number of obs     =         92
 #> Group variable: state                           Number of groups  =         46
 #> 
@@ -83,11 +85,4 @@ stata(stata_do2, data.out = TRUE, data.in = z)
 #>          rho |  .80214841   (fraction of variance due to u_i)
 #> ------------------------------------------------------------------------------
 
-# R random
-coef(plm(sales ~ pop, 
-            data=z, 
-            model="random", 
-            index=c("state", "year")))
-#>   (Intercept)           pop 
-#>  1.311398e+02 -6.837769e-04
 
